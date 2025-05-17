@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DPO NeuroTranslator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a82fb, #fc5c7d);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 6px 20px 0 rgba(31, 38, 135, 0.25);
+            color: white;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 5px 0 rgba(102, 126, 234, 0.7);
+            outline: none;
+        }
+
+        .btn-custom {
+            background-color: #ff7b7b;
+            color: #ffffff;
+            border: none;
+            font-weight: bold;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-color: #fc5c7d;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        hr {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .translation-result {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            color: #d4edda;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <h2 class="mb-4">NeuroTranslate</h2>
+        <form method="post">
+            <div class="mb-3">
+                <textarea name="text" class="form-control" rows="4" placeholder="Enter English text here..." required>{{ request.form.text or '' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-custom">Translate</button>
+        </form>
+        {% if translation %}
+        <hr>
+        <div class="translation-result">
+            <h5>Translation:</h5>
+            <p>{{ translation }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
