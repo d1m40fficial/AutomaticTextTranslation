@@ -1,0 +1,9 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+notebooks
+data
+docs
+README.md

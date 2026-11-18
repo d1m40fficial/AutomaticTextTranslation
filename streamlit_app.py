@@ -1,62 +1,60 @@
-# streamlit_app.py
+"""Streamlit-песочница: сравнение моделей перевода EN → RU по BLEU.
+
+Запуск: streamlit run streamlit_app.py
+"""
 
 import streamlit as st
+from sacrebleu import sentence_bleu
 from transformers import pipeline
-from sacrebleu import corpus_bleu
 
-# Список поддерживаемых моделей
 MODEL_OPTIONS = {
-    "Helsinki-NLP": "Helsinki-NLP/opus-mt-en-ru",
-    "TinyMT": "alirezamsh/tiny-opus-mt-en-ru",
-    "NLLB": "facebook/nllb-207"
+    "Helsinki-NLP/opus-mt-en-ru (лучшая по BLEU)": "Helsinki-NLP/opus-mt-en-ru",
+    "alirezamsh/tiny-opus-mt-en-ru (компактная)": "alirezamsh/tiny-opus-mt-en-ru",
+    "facebook/wmt19-en-ru (тяжёлая, ~1.2 ГБ)": "facebook/wmt19-en-ru",
 }
 
-# Тестовые данные (можно заменить на свои)
 TEST_EXAMPLES = {
     "Hello, how are you?": "Привет, как дела?",
     "I love machine learning!": "Я обожаю машинное обучение!",
-    "Artificial intelligence will change the world.": "Искусственный интеллект изменит мир."
+    "Artificial intelligence will change the world.": "Искусственный интеллект изменит мир.",
 }
 
-@st.cache_resource
-def load_model(model_name):
-    return pipeline("translation_en_to_ru", model=model_name)
 
-def calculate_bleu(reference, hypothesis):
-    return corpus_bleu([hypothesis], [[reference]]).score
+@st.cache_resource(show_spinner="Загружаю модель…")
+def load_model(model_name: str):
+    return pipeline(task="translation", model=model_name)
 
-# Интерфейс
-st.set_page_config(page_title="Переводчик с анализом", layout="wide")
+
+st.set_page_config(page_title="NeuroTranslate — сравнение моделей", layout="wide")
 st.title("Переводчик EN → RU с оценкой качества")
+st.caption("Сравнение трёх моделей Hugging Face по BLEU на эталонных переводах")
 
-model_choice = st.selectbox("Выберите модель:", list(MODEL_OPTIONS.keys()))
-translator = load_model(MODEL_OPTIONS[model_choice])
+model_label = st.selectbox("Модель", list(MODEL_OPTIONS))
+translator = load_model(MODEL_OPTIONS[model_label])
 
-text_input = st.text_area("Введите текст на английском:", height=200)
+text_input = st.text_area("Текст на английском", height=180, placeholder="Enter English text…")
 
-if st.button("Перевести"):
-    if text_input.strip() == "":
-        st.warning("Пожалуйста, введите текст для перевода.")
+if st.button("Перевести", type="primary"):
+    if not text_input.strip():
+        st.warning("Введите текст для перевода.")
     else:
-        with st.spinner("Перевожу..."):
+        with st.spinner("Перевожу…"):
             result = translator(text_input)[0]["translation_text"]
-            st.subheader("Результат перевода:")
-            st.success(result)
+        st.subheader("Перевод")
+        st.success(result)
 
-# Блок с тестовыми примерами
-st.sidebar.header("Тестовые примеры")
-example = st.sidebar.selectbox("Выберите пример", list(TEST_EXAMPLES.keys()))
+st.sidebar.header("Оценка на эталоне")
+example = st.sidebar.selectbox("Пример", list(TEST_EXAMPLES))
 
-if st.sidebar.button("Запустить пример"):
+if st.sidebar.button("Проверить BLEU"):
     reference = TEST_EXAMPLES[example]
     hypothesis = translator(example)[0]["translation_text"]
-    bleu_score = calculate_bleu(reference, hypothesis)
+    score = sentence_bleu(hypothesis, [reference]).score
 
-    st.subheader("Пример текста:")
+    st.subheader("Исходный текст")
     st.write(example)
-    st.subheader("Эталонный перевод:")
+    st.subheader("Эталон")
     st.info(reference)
-    st.subheader("Перевод модели:")
+    st.subheader("Перевод модели")
     st.success(hypothesis)
-    st.subheader("BLEU-оценка:")
-    st.metric(label="Оценка BLEU", value=f"{bleu_score:.1f}")
+    st.metric("BLEU", f"{score:.1f}")

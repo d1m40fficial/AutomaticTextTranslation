@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Кэш моделей и локальные данные
+data/*.txt
+data/*.tsv
+.ipynb_checkpoints/
+.DS_Store
